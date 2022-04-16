@@ -1,12 +1,18 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:guardian_app/routes/app_router_delegate.dart';
+import 'package:guardian_app/services/serial_service.dart';
 import 'package:guardian_app/themes/default_theme.dart';
 import 'package:sizer/sizer.dart';
 import 'package:theme_provider/theme_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const GuardianApp());
+  runApp(
+    const ProviderScope(
+      child: GuardianApp(),
+    ),
+  );
 }
 
 class GuardianApp extends StatelessWidget {

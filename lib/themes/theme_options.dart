@@ -8,6 +8,9 @@ class ThemeOptions implements AppThemeOptions {
   final Color textColorOnPrimary;
   final Color textColorOnSecondary;
   final Color backgroundColor;
+  final Color successColor;
+  final Color warningColor;
+  final Color errorColor;
 
   final double textSize1;
   final double textSize2;
@@ -22,6 +25,9 @@ class ThemeOptions implements AppThemeOptions {
     required this.textColorOnPrimary,
     required this.textColorOnSecondary,
     required this.backgroundColor,
+    required this.successColor,
+    required this.warningColor,
+    required this.errorColor,
     required this.textSize1,
     required this.textSize2,
     required this.textSize3,

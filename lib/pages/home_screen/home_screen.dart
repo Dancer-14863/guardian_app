@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:guardian_app/components/common/custom_app_bar.dart';
 import 'package:guardian_app/components/home_screen/scan_button.dart';
+import 'package:guardian_app/pages/home_screen/device_connected_section.dart';
+import 'package:guardian_app/services/guardian_service.dart';
 import 'package:guardian_app/themes/theme_options.dart';
-import 'package:sizer/sizer.dart';
+import 'package:guardian_app/utils/constants/status.dart';
+import 'package:guardian_app/utils/toast_helpers.dart';
 import 'package:theme_provider/theme_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+final guardianService = Provider.autoDispose((ref) => GuardianService(ref));
+
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final _themeOptions = ThemeProvider.optionsOf<ThemeOptions>(context);
+    final _guardianService = ref.watch(guardianService);
+    final _isDeviceConnected = ref.watch(isDeviceConnected);
 
     return Scaffold(
       backgroundColor: _themeOptions.backgroundColor,
@@ -21,9 +27,21 @@ class HomeScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Center(
-            child: ScanButton(
-              onPressed: () {},
-            ),
+            child: !_isDeviceConnected
+                ? ScanButton(
+                    onPressed: () async {
+                      try {
+                        await _guardianService.connectToDevice();
+                      } catch (e) {
+                        showToast(
+                          context: context,
+                          message: e.toString(),
+                          status: Status.error,
+                        );
+                      }
+                    },
+                  )
+                : const DeviceConnectedSection(),
           ),
         ],
       ),
