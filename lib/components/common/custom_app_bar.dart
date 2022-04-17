@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_svg/parser.dart';
+import 'package:guardian_app/components/common/intruder_warning.dart';
+import 'package:guardian_app/services/guardian_service.dart';
 import 'package:guardian_app/themes/theme_options.dart';
 import 'package:sizer/sizer.dart';
 import 'package:theme_provider/theme_provider.dart';
 
-class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
+class CustomAppBar extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   const CustomAppBar({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _CustomAppBarState();
+  createState() => _CustomAppBarState();
 
   @override
   Size get preferredSize => Size.fromHeight(8.h);
 }
 
-class _CustomAppBarState extends State<CustomAppBar> {
+class _CustomAppBarState extends ConsumerState<CustomAppBar> {
   static const String _logoAssetPath = 'assets/logo.svg';
 
   @override
@@ -43,6 +45,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            if (ref.watch(isDeviceInAlarmState)) const IntruderWarning(),
           ],
         ),
       ),

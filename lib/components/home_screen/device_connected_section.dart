@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:guardian_app/components/home_screen/deactivate_alarm_button.dart';
 import 'package:guardian_app/pages/home_screen/home_screen.dart';
 import 'package:guardian_app/services/guardian_service.dart';
 import 'package:guardian_app/themes/theme_options.dart';
@@ -63,6 +64,11 @@ class DeviceConnectedSection extends ConsumerWidget {
             }
           },
         ),
+        SizedBox(height: 5.h),
+        if (ref.watch(isDeviceInAlarmState))
+          DeactivateAlarmButton(
+            onPressed: () => _guardianService.deactivateAlarm(),
+          ),
       ],
     );
   }

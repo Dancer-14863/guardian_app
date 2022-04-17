@@ -1,37 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:guardian_app/themes/theme_options.dart';
 import 'package:guardian_app/utils/constants/status.dart';
-import 'package:theme_provider/theme_provider.dart';
+import 'package:sizer/sizer.dart';
 
 void showToast({
-  required BuildContext context,
   required String message,
   Toast length = Toast.LENGTH_SHORT,
   Status status = Status.success,
 }) {
-  final _themeOptions = ThemeProvider.optionsOf<ThemeOptions>(context);
   final Color backgroundColor;
 
   switch (status) {
     case Status.success:
-      backgroundColor = _themeOptions.successColor;
+      backgroundColor = const Color(0xFF49CE78);
       break;
     case Status.warning:
-      backgroundColor = _themeOptions.warningColor;
+      backgroundColor = const Color(0xFFE1B845);
       break;
     case Status.error:
-      backgroundColor = _themeOptions.errorColor;
+      backgroundColor = const Color(0xFFDB5B53);
       break;
   }
 
   Fluttertoast.showToast(
     msg: message,
     toastLength: length,
-    gravity: ToastGravity.BOTTOM,
     backgroundColor: backgroundColor,
-    textColor: _themeOptions.textColorOnPrimary,
-    fontSize: _themeOptions.textSize5,
+    textColor: Colors.white,
+    fontSize: 6.sp,
   );
 }
