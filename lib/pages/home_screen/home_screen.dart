@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:guardian_app/components/common/custom_app_bar.dart';
+import 'package:guardian_app/components/common/custom_drawer.dart';
 import 'package:guardian_app/components/home_screen/scan_button.dart';
 import 'package:guardian_app/components/home_screen/device_connected_section.dart';
 import 'package:guardian_app/services/guardian_service.dart';
@@ -23,6 +24,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: _themeOptions.backgroundColor,
       appBar: const CustomAppBar(),
+      endDrawer: const CustomDrawer(currentRoute: '/home'),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

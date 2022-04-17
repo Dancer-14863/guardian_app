@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
+import 'package:guardian_app/models/models.dart';
 import 'package:guardian_app/themes/theme_options.dart';
 import 'package:sizer/sizer.dart';
 import 'package:theme_provider/theme_provider.dart';
@@ -19,8 +20,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
       final beamer = Beamer.of(context);
+      await _addDefaultConfigurationIfNotExists();
       Timer(const Duration(milliseconds: 1000), () {
         beamer.beamToNamed('/home');
       });
@@ -55,5 +57,12 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ),
     );
+  }
+}
+
+Future<void> _addDefaultConfigurationIfNotExists() async {
+  final count = await Configuration().select().toCount();
+  if (count == 0) {
+    await Configuration().save();
   }
 }
