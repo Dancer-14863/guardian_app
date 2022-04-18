@@ -92,6 +92,53 @@ class TableConfiguration extends SqfEntityTableBase {
     return _instance = _instance ?? TableConfiguration();
   }
 }
+
+// AlarmLog TABLE
+class TableAlarmLog extends SqfEntityTableBase {
+  TableAlarmLog() {
+    // declare properties of EntityTable
+    tableName = 'alarmLog';
+    primaryKeyName = 'id';
+    primaryKeyType = PrimaryKeyType.integer_auto_incremental;
+    useSoftDeleting = false;
+    // when useSoftDeleting is true, creates a field named 'isDeleted' on the table, and set to '1' this field when item deleted (does not hard delete)
+
+    // declare fields
+    fields = [
+      SqfEntityFieldBase('recordedDate', DbType.datetime,
+          defaultValue: DateTime.now(), minValue: DateTime.parse('1900-01-01')),
+    ];
+    super.init();
+  }
+  static SqfEntityTableBase? _instance;
+  static SqfEntityTableBase get getInstance {
+    return _instance = _instance ?? TableAlarmLog();
+  }
+}
+
+// WaterGunLog TABLE
+class TableWaterGunLog extends SqfEntityTableBase {
+  TableWaterGunLog() {
+    // declare properties of EntityTable
+    tableName = 'waterGunLog';
+    primaryKeyName = 'id';
+    primaryKeyType = PrimaryKeyType.integer_auto_incremental;
+    useSoftDeleting = false;
+    // when useSoftDeleting is true, creates a field named 'isDeleted' on the table, and set to '1' this field when item deleted (does not hard delete)
+
+    // declare fields
+    fields = [
+      SqfEntityFieldBase('deployedSector', DbType.integer),
+      SqfEntityFieldBase('recordedDate', DbType.datetime,
+          defaultValue: DateTime.now(), minValue: DateTime.parse('1900-01-01')),
+    ];
+    super.init();
+  }
+  static SqfEntityTableBase? _instance;
+  static SqfEntityTableBase get getInstance {
+    return _instance = _instance ?? TableWaterGunLog();
+  }
+}
 // END TABLES
 
 // BEGIN DATABASE MODEL
@@ -106,6 +153,8 @@ class GuardianDatabaseModel extends SqfEntityModelProvider {
       TableDistanceLog.getInstance,
       TablePressurePlateLog.getInstance,
       TableConfiguration.getInstance,
+      TableAlarmLog.getInstance,
+      TableWaterGunLog.getInstance,
     ];
 
     bundledDatabasePath = guardianDatabaseModel
@@ -2558,6 +2607,1599 @@ class ConfigurationManager extends SqfEntityProvider {
 }
 
 //endregion ConfigurationManager
+// region AlarmLog
+class AlarmLog extends TableBase {
+  AlarmLog({this.id, this.recordedDate}) {
+    _setDefaultValues();
+    softDeleteActivated = false;
+  }
+  AlarmLog.withFields(this.recordedDate) {
+    _setDefaultValues();
+  }
+  AlarmLog.withId(this.id, this.recordedDate) {
+    _setDefaultValues();
+  }
+  // fromMap v2.0
+  AlarmLog.fromMap(Map<String, dynamic> o, {bool setDefaultValues = true}) {
+    if (setDefaultValues) {
+      _setDefaultValues();
+    }
+    id = int.tryParse(o['id'].toString());
+    if (o['recordedDate'] != null) {
+      recordedDate = int.tryParse(o['recordedDate'].toString()) != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              int.tryParse(o['recordedDate'].toString())!)
+          : DateTime.tryParse(o['recordedDate'].toString());
+    }
+  }
+  // FIELDS (AlarmLog)
+  int? id;
+  DateTime? recordedDate;
+
+  // end FIELDS (AlarmLog)
+
+  static const bool _softDeleteActivated = false;
+  AlarmLogManager? __mnAlarmLog;
+
+  AlarmLogManager get _mnAlarmLog {
+    return __mnAlarmLog = __mnAlarmLog ?? AlarmLogManager();
+  }
+
+  // METHODS
+  @override
+  Map<String, dynamic> toMap(
+      {bool forQuery = false, bool forJson = false, bool forView = false}) {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (recordedDate != null) {
+      map['recordedDate'] = forJson
+          ? recordedDate!.toString()
+          : forQuery
+              ? recordedDate!.millisecondsSinceEpoch
+              : recordedDate;
+    } else if (recordedDate != null || !forView) {
+      map['recordedDate'] = null;
+    }
+
+    return map;
+  }
+
+  @override
+  Future<Map<String, dynamic>> toMapWithChildren(
+      [bool forQuery = false,
+      bool forJson = false,
+      bool forView = false]) async {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (recordedDate != null) {
+      map['recordedDate'] = forJson
+          ? recordedDate!.toString()
+          : forQuery
+              ? recordedDate!.millisecondsSinceEpoch
+              : recordedDate;
+    } else if (recordedDate != null || !forView) {
+      map['recordedDate'] = null;
+    }
+
+    return map;
+  }
+
+  /// This method returns Json String [AlarmLog]
+  @override
+  String toJson() {
+    return json.encode(toMap(forJson: true));
+  }
+
+  /// This method returns Json String [AlarmLog]
+  @override
+  Future<String> toJsonWithChilds() async {
+    return json.encode(await toMapWithChildren(false, true));
+  }
+
+  @override
+  List<dynamic> toArgs() {
+    return [recordedDate != null ? recordedDate!.millisecondsSinceEpoch : null];
+  }
+
+  @override
+  List<dynamic> toArgsWithIds() {
+    return [
+      id,
+      recordedDate != null ? recordedDate!.millisecondsSinceEpoch : null
+    ];
+  }
+
+  static Future<List<AlarmLog>?> fromWebUrl(Uri uri,
+      {Map<String, String>? headers}) async {
+    try {
+      final response = await http.get(uri, headers: headers);
+      return await fromJson(response.body);
+    } catch (e) {
+      debugPrint(
+          'SQFENTITY ERROR AlarmLog.fromWebUrl: ErrorMessage: ${e.toString()}');
+      return null;
+    }
+  }
+
+  Future<http.Response> postUrl(Uri uri, {Map<String, String>? headers}) {
+    return http.post(uri, headers: headers, body: toJson());
+  }
+
+  static Future<List<AlarmLog>> fromJson(String jsonBody) async {
+    final Iterable list = await json.decode(jsonBody) as Iterable;
+    var objList = <AlarmLog>[];
+    try {
+      objList = list
+          .map((alarmlog) => AlarmLog.fromMap(alarmlog as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint(
+          'SQFENTITY ERROR AlarmLog.fromJson: ErrorMessage: ${e.toString()}');
+    }
+    return objList;
+  }
+
+  static Future<List<AlarmLog>> fromMapList(List<dynamic> data,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields,
+      bool setDefaultValues = true}) async {
+    final List<AlarmLog> objList = <AlarmLog>[];
+    loadedFields = loadedFields ?? [];
+    for (final map in data) {
+      final obj = AlarmLog.fromMap(map as Map<String, dynamic>,
+          setDefaultValues: setDefaultValues);
+
+      objList.add(obj);
+    }
+    return objList;
+  }
+
+  /// returns AlarmLog by ID if exist, otherwise returns null
+  /// Primary Keys: int? id
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: getById(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: getById(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>returns [AlarmLog] if exist, otherwise returns null
+  Future<AlarmLog?> getById(int? id,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    if (id == null) {
+      return null;
+    }
+    AlarmLog? obj;
+    final data = await _mnAlarmLog.getById([id]);
+    if (data.length != 0) {
+      obj = AlarmLog.fromMap(data[0] as Map<String, dynamic>);
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// Saves the (AlarmLog) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> save({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnAlarmLog.insert(this, ignoreBatch);
+    } else {
+      await _mnAlarmLog.update(this);
+    }
+
+    return id;
+  }
+
+  /// Saves the (AlarmLog) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> saveOrThrow({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnAlarmLog.insertOrThrow(this, ignoreBatch);
+
+      isInsert = true;
+    } else {
+      // id= await _upsert(); // removed in sqfentity_gen 1.3.0+6
+      await _mnAlarmLog.updateOrThrow(this);
+    }
+
+    return id;
+  }
+
+  /// saveAs AlarmLog. Returns a new Primary Key value of AlarmLog
+
+  /// <returns>Returns a new Primary Key value of AlarmLog
+  @override
+  Future<int?> saveAs({bool ignoreBatch = true}) async {
+    id = null;
+
+    return save(ignoreBatch: ignoreBatch);
+  }
+
+  /// saveAll method saves the sent List<AlarmLog> as a bulk in one transaction
+  /// Returns a <List<BoolResult>>
+  static Future<List<dynamic>> saveAll(List<AlarmLog> alarmlogs) async {
+    List<dynamic>? result = [];
+    // If there is no open transaction, start one
+    final isStartedBatch = await GuardianDatabaseModel().batchStart();
+    for (final obj in alarmlogs) {
+      await obj.save(ignoreBatch: false);
+    }
+    if (!isStartedBatch) {
+      result = await GuardianDatabaseModel().batchCommit();
+      for (int i = 0; i < alarmlogs.length; i++) {
+        if (alarmlogs[i].id == null) {
+          alarmlogs[i].id = result![i] as int;
+        }
+      }
+    }
+    return result!;
+  }
+
+  /// Updates if the record exists, otherwise adds a new row
+  /// <returns>Returns id
+  @override
+  Future<int?> upsert({bool ignoreBatch = true}) async {
+    try {
+      final result = await _mnAlarmLog.rawInsert(
+          'INSERT OR REPLACE INTO alarmLog (id, recordedDate)  VALUES (?,?)',
+          [
+            id,
+            recordedDate != null ? recordedDate!.millisecondsSinceEpoch : null
+          ],
+          ignoreBatch);
+      if (result! > 0) {
+        saveResult = BoolResult(
+            success: true,
+            successMessage: 'AlarmLog id=$id updated successfully');
+      } else {
+        saveResult = BoolResult(
+            success: false, errorMessage: 'AlarmLog id=$id did not update');
+      }
+      return id;
+    } catch (e) {
+      saveResult = BoolResult(
+          success: false,
+          errorMessage: 'AlarmLog Save failed. Error: ${e.toString()}');
+      return null;
+    }
+  }
+
+  /// inserts or replaces the sent List<<AlarmLog>> as a bulk in one transaction.
+  /// upsertAll() method is faster then saveAll() method. upsertAll() should be used when you are sure that the primary key is greater than zero
+  /// Returns a BoolCommitResult
+  @override
+  Future<BoolCommitResult> upsertAll(List<AlarmLog> alarmlogs) async {
+    final results = await _mnAlarmLog.rawInsertAll(
+        'INSERT OR REPLACE INTO alarmLog (id, recordedDate)  VALUES (?,?)',
+        alarmlogs);
+    return results;
+  }
+
+  /// Deletes AlarmLog
+
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    debugPrint('SQFENTITIY: delete AlarmLog invoked (id=$id)');
+    if (!_softDeleteActivated || hardDelete) {
+      return _mnAlarmLog
+          .delete(QueryParams(whereString: 'id=?', whereArguments: [id]));
+    } else {
+      return _mnAlarmLog.updateBatch(
+          QueryParams(whereString: 'id=?', whereArguments: [id]),
+          {'isDeleted': 1});
+    }
+  }
+
+  @override
+  Future<BoolResult> recover([bool recoverChilds = true]) {
+    // not implemented because:
+    final msg =
+        'set useSoftDeleting:true in the table definition of [AlarmLog] to use this feature';
+    throw UnimplementedError(msg);
+  }
+
+  @override
+  AlarmLogFilterBuilder select(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return AlarmLogFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect;
+  }
+
+  @override
+  AlarmLogFilterBuilder distinct(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return AlarmLogFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect
+      ..qparams.distinct = true;
+  }
+
+  void _setDefaultValues() {
+    recordedDate = recordedDate ?? DateTime.now();
+  }
+
+  @override
+  void rollbackPk() {
+    if (isInsert == true) {
+      id = null;
+    }
+  }
+
+  // END METHODS
+  // BEGIN CUSTOM CODE
+  /*
+      you can define customCode property of your SqfEntityTable constant. For example:
+      const tablePerson = SqfEntityTable(
+      tableName: 'person',
+      primaryKeyName: 'id',
+      primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+      fields: [
+        SqfEntityField('firstName', DbType.text),
+        SqfEntityField('lastName', DbType.text),
+      ],
+      customCode: '''
+       String fullName()
+       { 
+         return '$firstName $lastName';
+       }
+      ''');
+     */
+  // END CUSTOM CODE
+}
+// endregion alarmlog
+
+// region AlarmLogField
+class AlarmLogField extends FilterBase {
+  AlarmLogField(AlarmLogFilterBuilder alarmlogFB) : super(alarmlogFB);
+
+  @override
+  AlarmLogFilterBuilder equals(dynamic pValue) {
+    return super.equals(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder equalsOrNull(dynamic pValue) {
+    return super.equalsOrNull(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder isNull() {
+    return super.isNull() as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder contains(dynamic pValue) {
+    return super.contains(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder startsWith(dynamic pValue) {
+    return super.startsWith(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder endsWith(dynamic pValue) {
+    return super.endsWith(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder between(dynamic pFirst, dynamic pLast) {
+    return super.between(pFirst, pLast) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder greaterThan(dynamic pValue) {
+    return super.greaterThan(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder lessThan(dynamic pValue) {
+    return super.lessThan(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder greaterThanOrEquals(dynamic pValue) {
+    return super.greaterThanOrEquals(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder lessThanOrEquals(dynamic pValue) {
+    return super.lessThanOrEquals(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogFilterBuilder inValues(dynamic pValue) {
+    return super.inValues(pValue) as AlarmLogFilterBuilder;
+  }
+
+  @override
+  AlarmLogField get not {
+    return super.not as AlarmLogField;
+  }
+}
+// endregion AlarmLogField
+
+// region AlarmLogFilterBuilder
+class AlarmLogFilterBuilder extends ConjunctionBase {
+  AlarmLogFilterBuilder(AlarmLog obj, bool? getIsDeleted)
+      : super(obj, getIsDeleted) {
+    _mnAlarmLog = obj._mnAlarmLog;
+    _softDeleteActivated = obj.softDeleteActivated;
+  }
+
+  bool _softDeleteActivated = false;
+  AlarmLogManager? _mnAlarmLog;
+
+  /// put the sql keyword 'AND'
+  @override
+  AlarmLogFilterBuilder get and {
+    super.and;
+    return this;
+  }
+
+  /// put the sql keyword 'OR'
+  @override
+  AlarmLogFilterBuilder get or {
+    super.or;
+    return this;
+  }
+
+  /// open parentheses
+  @override
+  AlarmLogFilterBuilder get startBlock {
+    super.startBlock;
+    return this;
+  }
+
+  /// String whereCriteria, write raw query without 'where' keyword. Like this: 'field1 like 'test%' and field2 = 3'
+  @override
+  AlarmLogFilterBuilder where(String? whereCriteria, {dynamic parameterValue}) {
+    super.where(whereCriteria, parameterValue: parameterValue);
+    return this;
+  }
+
+  /// page = page number,
+  /// pagesize = row(s) per page
+  @override
+  AlarmLogFilterBuilder page(int page, int pagesize) {
+    super.page(page, pagesize);
+    return this;
+  }
+
+  /// int count = LIMIT
+  @override
+  AlarmLogFilterBuilder top(int count) {
+    super.top(count);
+    return this;
+  }
+
+  /// close parentheses
+  @override
+  AlarmLogFilterBuilder get endBlock {
+    super.endBlock;
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  AlarmLogFilterBuilder orderBy(dynamic argFields) {
+    super.orderBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  AlarmLogFilterBuilder orderByDesc(dynamic argFields) {
+    super.orderByDesc(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  AlarmLogFilterBuilder groupBy(dynamic argFields) {
+    super.groupBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  AlarmLogFilterBuilder having(dynamic argFields) {
+    super.having(argFields);
+    return this;
+  }
+
+  AlarmLogField _setField(AlarmLogField? field, String colName, DbType dbtype) {
+    return AlarmLogField(this)
+      ..param = DbParameter(
+          dbType: dbtype, columnName: colName, wStartBlock: openedBlock);
+  }
+
+  AlarmLogField? _id;
+  AlarmLogField get id {
+    return _id = _setField(_id, 'id', DbType.integer);
+  }
+
+  AlarmLogField? _recordedDate;
+  AlarmLogField get recordedDate {
+    return _recordedDate =
+        _setField(_recordedDate, 'recordedDate', DbType.datetime);
+  }
+
+  /// Deletes List<AlarmLog> bulk by query
+  ///
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    buildParameters();
+    var r = BoolResult(success: false);
+
+    if (_softDeleteActivated && !hardDelete) {
+      r = await _mnAlarmLog!.updateBatch(qparams, {'isDeleted': 1});
+    } else {
+      r = await _mnAlarmLog!.delete(qparams);
+    }
+    return r;
+  }
+
+  /// using:
+  /// update({'fieldName': Value})
+  /// fieldName must be String. Value is dynamic, it can be any of the (int, bool, String.. )
+  @override
+  Future<BoolResult> update(Map<String, dynamic> values) {
+    buildParameters();
+    if (qparams.limit! > 0 || qparams.offset! > 0) {
+      qparams.whereString =
+          'id IN (SELECT id from alarmLog ${qparams.whereString!.isNotEmpty ? 'WHERE ${qparams.whereString}' : ''}${qparams.limit! > 0 ? ' LIMIT ${qparams.limit}' : ''}${qparams.offset! > 0 ? ' OFFSET ${qparams.offset}' : ''})';
+    }
+    return _mnAlarmLog!.updateBatch(qparams, values);
+  }
+
+  /// This method always returns [AlarmLog] Obj if exist, otherwise returns null
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> AlarmLog?
+  @override
+  Future<AlarmLog?> toSingle(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    buildParameters(pSize: 1);
+    final objFuture = _mnAlarmLog!.toList(qparams);
+    final data = await objFuture;
+    AlarmLog? obj;
+    if (data.isNotEmpty) {
+      obj = AlarmLog.fromMap(data[0] as Map<String, dynamic>);
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// This method always returns [AlarmLog]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> AlarmLog?
+  @override
+  Future<AlarmLog> toSingleOrDefault(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    return await toSingle(
+            preload: preload,
+            preloadFields: preloadFields,
+            loadParents: loadParents,
+            loadedFields: loadedFields) ??
+        AlarmLog();
+  }
+
+  /// This method returns int. [AlarmLog]
+  /// <returns>int
+  @override
+  Future<int> toCount([VoidCallback Function(int c)? alarmlogCount]) async {
+    buildParameters();
+    qparams.selectColumns = ['COUNT(1) AS CNT'];
+    final alarmlogsFuture = await _mnAlarmLog!.toList(qparams);
+    final int count = alarmlogsFuture[0]['CNT'] as int;
+    if (alarmlogCount != null) {
+      alarmlogCount(count);
+    }
+    return count;
+  }
+
+  /// This method returns List<AlarmLog> [AlarmLog]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toList(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toList(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>List<AlarmLog>
+  @override
+  Future<List<AlarmLog>> toList(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    final data = await toMapList();
+    final List<AlarmLog> alarmlogsData = await AlarmLog.fromMapList(data,
+        preload: preload,
+        preloadFields: preloadFields,
+        loadParents: loadParents,
+        loadedFields: loadedFields,
+        setDefaultValues: qparams.selectColumns == null);
+    return alarmlogsData;
+  }
+
+  /// This method returns Json String [AlarmLog]
+  @override
+  Future<String> toJson() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(o.toMap(forJson: true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns Json String. [AlarmLog]
+  @override
+  Future<String> toJsonWithChilds() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(await o.toMapWithChildren(false, true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns List<dynamic>. [AlarmLog]
+  /// <returns>List<dynamic>
+  @override
+  Future<List<dynamic>> toMapList() async {
+    buildParameters();
+    return await _mnAlarmLog!.toList(qparams);
+  }
+
+  /// This method returns Primary Key List SQL and Parameters retVal = Map<String,dynamic>. [AlarmLog]
+  /// retVal['sql'] = SQL statement string, retVal['args'] = whereArguments List<dynamic>;
+  /// <returns>List<String>
+  @override
+  Map<String, dynamic> toListPrimaryKeySQL([bool buildParams = true]) {
+    final Map<String, dynamic> _retVal = <String, dynamic>{};
+    if (buildParams) {
+      buildParameters();
+    }
+    _retVal['sql'] = 'SELECT `id` FROM alarmLog WHERE ${qparams.whereString}';
+    _retVal['args'] = qparams.whereArguments;
+    return _retVal;
+  }
+
+  /// This method returns Primary Key List<int>.
+  /// <returns>List<int>
+  @override
+  Future<List<int>> toListPrimaryKey([bool buildParams = true]) async {
+    if (buildParams) {
+      buildParameters();
+    }
+    final List<int> idData = <int>[];
+    qparams.selectColumns = ['id'];
+    final idFuture = await _mnAlarmLog!.toList(qparams);
+
+    final int count = idFuture.length;
+    for (int i = 0; i < count; i++) {
+      idData.add(idFuture[i]['id'] as int);
+    }
+    return idData;
+  }
+
+  /// Returns List<dynamic> for selected columns. Use this method for 'groupBy' with min,max,avg..  [AlarmLog]
+  /// Sample usage: (see EXAMPLE 4.2 at https://github.com/hhtokpinar/sqfEntity#group-by)
+  @override
+  Future<List<dynamic>> toListObject() async {
+    buildParameters();
+
+    final objectFuture = _mnAlarmLog!.toList(qparams);
+
+    final List<dynamic> objectsData = <dynamic>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i]);
+    }
+    return objectsData;
+  }
+
+  /// Returns List<String> for selected first column
+  /// Sample usage: await AlarmLog.select(columnsToSelect: ['columnName']).toListString()
+  @override
+  Future<List<String>> toListString(
+      [VoidCallback Function(List<String> o)? listString]) async {
+    buildParameters();
+
+    final objectFuture = _mnAlarmLog!.toList(qparams);
+
+    final List<String> objectsData = <String>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i][qparams.selectColumns![0]].toString());
+    }
+    if (listString != null) {
+      listString(objectsData);
+    }
+    return objectsData;
+  }
+}
+// endregion AlarmLogFilterBuilder
+
+// region AlarmLogFields
+class AlarmLogFields {
+  static TableField? _fId;
+  static TableField get id {
+    return _fId = _fId ?? SqlSyntax.setField(_fId, 'id', DbType.integer);
+  }
+
+  static TableField? _fRecordedDate;
+  static TableField get recordedDate {
+    return _fRecordedDate = _fRecordedDate ??
+        SqlSyntax.setField(_fRecordedDate, 'recordedDate', DbType.datetime);
+  }
+}
+// endregion AlarmLogFields
+
+//region AlarmLogManager
+class AlarmLogManager extends SqfEntityProvider {
+  AlarmLogManager()
+      : super(GuardianDatabaseModel(),
+            tableName: _tableName,
+            primaryKeyList: _primaryKeyList,
+            whereStr: _whereStr);
+  static const String _tableName = 'alarmLog';
+  static const List<String> _primaryKeyList = ['id'];
+  static const String _whereStr = 'id=?';
+}
+
+//endregion AlarmLogManager
+// region WaterGunLog
+class WaterGunLog extends TableBase {
+  WaterGunLog({this.id, this.deployedSector, this.recordedDate}) {
+    _setDefaultValues();
+    softDeleteActivated = false;
+  }
+  WaterGunLog.withFields(this.deployedSector, this.recordedDate) {
+    _setDefaultValues();
+  }
+  WaterGunLog.withId(this.id, this.deployedSector, this.recordedDate) {
+    _setDefaultValues();
+  }
+  // fromMap v2.0
+  WaterGunLog.fromMap(Map<String, dynamic> o, {bool setDefaultValues = true}) {
+    if (setDefaultValues) {
+      _setDefaultValues();
+    }
+    id = int.tryParse(o['id'].toString());
+    if (o['deployedSector'] != null) {
+      deployedSector = int.tryParse(o['deployedSector'].toString());
+    }
+    if (o['recordedDate'] != null) {
+      recordedDate = int.tryParse(o['recordedDate'].toString()) != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              int.tryParse(o['recordedDate'].toString())!)
+          : DateTime.tryParse(o['recordedDate'].toString());
+    }
+  }
+  // FIELDS (WaterGunLog)
+  int? id;
+  int? deployedSector;
+  DateTime? recordedDate;
+
+  // end FIELDS (WaterGunLog)
+
+  static const bool _softDeleteActivated = false;
+  WaterGunLogManager? __mnWaterGunLog;
+
+  WaterGunLogManager get _mnWaterGunLog {
+    return __mnWaterGunLog = __mnWaterGunLog ?? WaterGunLogManager();
+  }
+
+  // METHODS
+  @override
+  Map<String, dynamic> toMap(
+      {bool forQuery = false, bool forJson = false, bool forView = false}) {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (deployedSector != null || !forView) {
+      map['deployedSector'] = deployedSector;
+    }
+    if (recordedDate != null) {
+      map['recordedDate'] = forJson
+          ? recordedDate!.toString()
+          : forQuery
+              ? recordedDate!.millisecondsSinceEpoch
+              : recordedDate;
+    } else if (recordedDate != null || !forView) {
+      map['recordedDate'] = null;
+    }
+
+    return map;
+  }
+
+  @override
+  Future<Map<String, dynamic>> toMapWithChildren(
+      [bool forQuery = false,
+      bool forJson = false,
+      bool forView = false]) async {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (deployedSector != null || !forView) {
+      map['deployedSector'] = deployedSector;
+    }
+    if (recordedDate != null) {
+      map['recordedDate'] = forJson
+          ? recordedDate!.toString()
+          : forQuery
+              ? recordedDate!.millisecondsSinceEpoch
+              : recordedDate;
+    } else if (recordedDate != null || !forView) {
+      map['recordedDate'] = null;
+    }
+
+    return map;
+  }
+
+  /// This method returns Json String [WaterGunLog]
+  @override
+  String toJson() {
+    return json.encode(toMap(forJson: true));
+  }
+
+  /// This method returns Json String [WaterGunLog]
+  @override
+  Future<String> toJsonWithChilds() async {
+    return json.encode(await toMapWithChildren(false, true));
+  }
+
+  @override
+  List<dynamic> toArgs() {
+    return [
+      deployedSector,
+      recordedDate != null ? recordedDate!.millisecondsSinceEpoch : null
+    ];
+  }
+
+  @override
+  List<dynamic> toArgsWithIds() {
+    return [
+      id,
+      deployedSector,
+      recordedDate != null ? recordedDate!.millisecondsSinceEpoch : null
+    ];
+  }
+
+  static Future<List<WaterGunLog>?> fromWebUrl(Uri uri,
+      {Map<String, String>? headers}) async {
+    try {
+      final response = await http.get(uri, headers: headers);
+      return await fromJson(response.body);
+    } catch (e) {
+      debugPrint(
+          'SQFENTITY ERROR WaterGunLog.fromWebUrl: ErrorMessage: ${e.toString()}');
+      return null;
+    }
+  }
+
+  Future<http.Response> postUrl(Uri uri, {Map<String, String>? headers}) {
+    return http.post(uri, headers: headers, body: toJson());
+  }
+
+  static Future<List<WaterGunLog>> fromJson(String jsonBody) async {
+    final Iterable list = await json.decode(jsonBody) as Iterable;
+    var objList = <WaterGunLog>[];
+    try {
+      objList = list
+          .map((watergunlog) =>
+              WaterGunLog.fromMap(watergunlog as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint(
+          'SQFENTITY ERROR WaterGunLog.fromJson: ErrorMessage: ${e.toString()}');
+    }
+    return objList;
+  }
+
+  static Future<List<WaterGunLog>> fromMapList(List<dynamic> data,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields,
+      bool setDefaultValues = true}) async {
+    final List<WaterGunLog> objList = <WaterGunLog>[];
+    loadedFields = loadedFields ?? [];
+    for (final map in data) {
+      final obj = WaterGunLog.fromMap(map as Map<String, dynamic>,
+          setDefaultValues: setDefaultValues);
+
+      objList.add(obj);
+    }
+    return objList;
+  }
+
+  /// returns WaterGunLog by ID if exist, otherwise returns null
+  /// Primary Keys: int? id
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: getById(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: getById(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>returns [WaterGunLog] if exist, otherwise returns null
+  Future<WaterGunLog?> getById(int? id,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    if (id == null) {
+      return null;
+    }
+    WaterGunLog? obj;
+    final data = await _mnWaterGunLog.getById([id]);
+    if (data.length != 0) {
+      obj = WaterGunLog.fromMap(data[0] as Map<String, dynamic>);
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// Saves the (WaterGunLog) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> save({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnWaterGunLog.insert(this, ignoreBatch);
+    } else {
+      await _mnWaterGunLog.update(this);
+    }
+
+    return id;
+  }
+
+  /// Saves the (WaterGunLog) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> saveOrThrow({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnWaterGunLog.insertOrThrow(this, ignoreBatch);
+
+      isInsert = true;
+    } else {
+      // id= await _upsert(); // removed in sqfentity_gen 1.3.0+6
+      await _mnWaterGunLog.updateOrThrow(this);
+    }
+
+    return id;
+  }
+
+  /// saveAs WaterGunLog. Returns a new Primary Key value of WaterGunLog
+
+  /// <returns>Returns a new Primary Key value of WaterGunLog
+  @override
+  Future<int?> saveAs({bool ignoreBatch = true}) async {
+    id = null;
+
+    return save(ignoreBatch: ignoreBatch);
+  }
+
+  /// saveAll method saves the sent List<WaterGunLog> as a bulk in one transaction
+  /// Returns a <List<BoolResult>>
+  static Future<List<dynamic>> saveAll(List<WaterGunLog> watergunlogs) async {
+    List<dynamic>? result = [];
+    // If there is no open transaction, start one
+    final isStartedBatch = await GuardianDatabaseModel().batchStart();
+    for (final obj in watergunlogs) {
+      await obj.save(ignoreBatch: false);
+    }
+    if (!isStartedBatch) {
+      result = await GuardianDatabaseModel().batchCommit();
+      for (int i = 0; i < watergunlogs.length; i++) {
+        if (watergunlogs[i].id == null) {
+          watergunlogs[i].id = result![i] as int;
+        }
+      }
+    }
+    return result!;
+  }
+
+  /// Updates if the record exists, otherwise adds a new row
+  /// <returns>Returns id
+  @override
+  Future<int?> upsert({bool ignoreBatch = true}) async {
+    try {
+      final result = await _mnWaterGunLog.rawInsert(
+          'INSERT OR REPLACE INTO waterGunLog (id, deployedSector, recordedDate)  VALUES (?,?,?)',
+          [
+            id,
+            deployedSector,
+            recordedDate != null ? recordedDate!.millisecondsSinceEpoch : null
+          ],
+          ignoreBatch);
+      if (result! > 0) {
+        saveResult = BoolResult(
+            success: true,
+            successMessage: 'WaterGunLog id=$id updated successfully');
+      } else {
+        saveResult = BoolResult(
+            success: false, errorMessage: 'WaterGunLog id=$id did not update');
+      }
+      return id;
+    } catch (e) {
+      saveResult = BoolResult(
+          success: false,
+          errorMessage: 'WaterGunLog Save failed. Error: ${e.toString()}');
+      return null;
+    }
+  }
+
+  /// inserts or replaces the sent List<<WaterGunLog>> as a bulk in one transaction.
+  /// upsertAll() method is faster then saveAll() method. upsertAll() should be used when you are sure that the primary key is greater than zero
+  /// Returns a BoolCommitResult
+  @override
+  Future<BoolCommitResult> upsertAll(List<WaterGunLog> watergunlogs) async {
+    final results = await _mnWaterGunLog.rawInsertAll(
+        'INSERT OR REPLACE INTO waterGunLog (id, deployedSector, recordedDate)  VALUES (?,?,?)',
+        watergunlogs);
+    return results;
+  }
+
+  /// Deletes WaterGunLog
+
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    debugPrint('SQFENTITIY: delete WaterGunLog invoked (id=$id)');
+    if (!_softDeleteActivated || hardDelete) {
+      return _mnWaterGunLog
+          .delete(QueryParams(whereString: 'id=?', whereArguments: [id]));
+    } else {
+      return _mnWaterGunLog.updateBatch(
+          QueryParams(whereString: 'id=?', whereArguments: [id]),
+          {'isDeleted': 1});
+    }
+  }
+
+  @override
+  Future<BoolResult> recover([bool recoverChilds = true]) {
+    // not implemented because:
+    final msg =
+        'set useSoftDeleting:true in the table definition of [WaterGunLog] to use this feature';
+    throw UnimplementedError(msg);
+  }
+
+  @override
+  WaterGunLogFilterBuilder select(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return WaterGunLogFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect;
+  }
+
+  @override
+  WaterGunLogFilterBuilder distinct(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return WaterGunLogFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect
+      ..qparams.distinct = true;
+  }
+
+  void _setDefaultValues() {
+    recordedDate = recordedDate ?? DateTime.now();
+  }
+
+  @override
+  void rollbackPk() {
+    if (isInsert == true) {
+      id = null;
+    }
+  }
+
+  // END METHODS
+  // BEGIN CUSTOM CODE
+  /*
+      you can define customCode property of your SqfEntityTable constant. For example:
+      const tablePerson = SqfEntityTable(
+      tableName: 'person',
+      primaryKeyName: 'id',
+      primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+      fields: [
+        SqfEntityField('firstName', DbType.text),
+        SqfEntityField('lastName', DbType.text),
+      ],
+      customCode: '''
+       String fullName()
+       { 
+         return '$firstName $lastName';
+       }
+      ''');
+     */
+  // END CUSTOM CODE
+}
+// endregion watergunlog
+
+// region WaterGunLogField
+class WaterGunLogField extends FilterBase {
+  WaterGunLogField(WaterGunLogFilterBuilder watergunlogFB)
+      : super(watergunlogFB);
+
+  @override
+  WaterGunLogFilterBuilder equals(dynamic pValue) {
+    return super.equals(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder equalsOrNull(dynamic pValue) {
+    return super.equalsOrNull(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder isNull() {
+    return super.isNull() as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder contains(dynamic pValue) {
+    return super.contains(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder startsWith(dynamic pValue) {
+    return super.startsWith(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder endsWith(dynamic pValue) {
+    return super.endsWith(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder between(dynamic pFirst, dynamic pLast) {
+    return super.between(pFirst, pLast) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder greaterThan(dynamic pValue) {
+    return super.greaterThan(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder lessThan(dynamic pValue) {
+    return super.lessThan(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder greaterThanOrEquals(dynamic pValue) {
+    return super.greaterThanOrEquals(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder lessThanOrEquals(dynamic pValue) {
+    return super.lessThanOrEquals(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogFilterBuilder inValues(dynamic pValue) {
+    return super.inValues(pValue) as WaterGunLogFilterBuilder;
+  }
+
+  @override
+  WaterGunLogField get not {
+    return super.not as WaterGunLogField;
+  }
+}
+// endregion WaterGunLogField
+
+// region WaterGunLogFilterBuilder
+class WaterGunLogFilterBuilder extends ConjunctionBase {
+  WaterGunLogFilterBuilder(WaterGunLog obj, bool? getIsDeleted)
+      : super(obj, getIsDeleted) {
+    _mnWaterGunLog = obj._mnWaterGunLog;
+    _softDeleteActivated = obj.softDeleteActivated;
+  }
+
+  bool _softDeleteActivated = false;
+  WaterGunLogManager? _mnWaterGunLog;
+
+  /// put the sql keyword 'AND'
+  @override
+  WaterGunLogFilterBuilder get and {
+    super.and;
+    return this;
+  }
+
+  /// put the sql keyword 'OR'
+  @override
+  WaterGunLogFilterBuilder get or {
+    super.or;
+    return this;
+  }
+
+  /// open parentheses
+  @override
+  WaterGunLogFilterBuilder get startBlock {
+    super.startBlock;
+    return this;
+  }
+
+  /// String whereCriteria, write raw query without 'where' keyword. Like this: 'field1 like 'test%' and field2 = 3'
+  @override
+  WaterGunLogFilterBuilder where(String? whereCriteria,
+      {dynamic parameterValue}) {
+    super.where(whereCriteria, parameterValue: parameterValue);
+    return this;
+  }
+
+  /// page = page number,
+  /// pagesize = row(s) per page
+  @override
+  WaterGunLogFilterBuilder page(int page, int pagesize) {
+    super.page(page, pagesize);
+    return this;
+  }
+
+  /// int count = LIMIT
+  @override
+  WaterGunLogFilterBuilder top(int count) {
+    super.top(count);
+    return this;
+  }
+
+  /// close parentheses
+  @override
+  WaterGunLogFilterBuilder get endBlock {
+    super.endBlock;
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  WaterGunLogFilterBuilder orderBy(dynamic argFields) {
+    super.orderBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  WaterGunLogFilterBuilder orderByDesc(dynamic argFields) {
+    super.orderByDesc(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  WaterGunLogFilterBuilder groupBy(dynamic argFields) {
+    super.groupBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  WaterGunLogFilterBuilder having(dynamic argFields) {
+    super.having(argFields);
+    return this;
+  }
+
+  WaterGunLogField _setField(
+      WaterGunLogField? field, String colName, DbType dbtype) {
+    return WaterGunLogField(this)
+      ..param = DbParameter(
+          dbType: dbtype, columnName: colName, wStartBlock: openedBlock);
+  }
+
+  WaterGunLogField? _id;
+  WaterGunLogField get id {
+    return _id = _setField(_id, 'id', DbType.integer);
+  }
+
+  WaterGunLogField? _deployedSector;
+  WaterGunLogField get deployedSector {
+    return _deployedSector =
+        _setField(_deployedSector, 'deployedSector', DbType.integer);
+  }
+
+  WaterGunLogField? _recordedDate;
+  WaterGunLogField get recordedDate {
+    return _recordedDate =
+        _setField(_recordedDate, 'recordedDate', DbType.datetime);
+  }
+
+  /// Deletes List<WaterGunLog> bulk by query
+  ///
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    buildParameters();
+    var r = BoolResult(success: false);
+
+    if (_softDeleteActivated && !hardDelete) {
+      r = await _mnWaterGunLog!.updateBatch(qparams, {'isDeleted': 1});
+    } else {
+      r = await _mnWaterGunLog!.delete(qparams);
+    }
+    return r;
+  }
+
+  /// using:
+  /// update({'fieldName': Value})
+  /// fieldName must be String. Value is dynamic, it can be any of the (int, bool, String.. )
+  @override
+  Future<BoolResult> update(Map<String, dynamic> values) {
+    buildParameters();
+    if (qparams.limit! > 0 || qparams.offset! > 0) {
+      qparams.whereString =
+          'id IN (SELECT id from waterGunLog ${qparams.whereString!.isNotEmpty ? 'WHERE ${qparams.whereString}' : ''}${qparams.limit! > 0 ? ' LIMIT ${qparams.limit}' : ''}${qparams.offset! > 0 ? ' OFFSET ${qparams.offset}' : ''})';
+    }
+    return _mnWaterGunLog!.updateBatch(qparams, values);
+  }
+
+  /// This method always returns [WaterGunLog] Obj if exist, otherwise returns null
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> WaterGunLog?
+  @override
+  Future<WaterGunLog?> toSingle(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    buildParameters(pSize: 1);
+    final objFuture = _mnWaterGunLog!.toList(qparams);
+    final data = await objFuture;
+    WaterGunLog? obj;
+    if (data.isNotEmpty) {
+      obj = WaterGunLog.fromMap(data[0] as Map<String, dynamic>);
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// This method always returns [WaterGunLog]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> WaterGunLog?
+  @override
+  Future<WaterGunLog> toSingleOrDefault(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    return await toSingle(
+            preload: preload,
+            preloadFields: preloadFields,
+            loadParents: loadParents,
+            loadedFields: loadedFields) ??
+        WaterGunLog();
+  }
+
+  /// This method returns int. [WaterGunLog]
+  /// <returns>int
+  @override
+  Future<int> toCount([VoidCallback Function(int c)? watergunlogCount]) async {
+    buildParameters();
+    qparams.selectColumns = ['COUNT(1) AS CNT'];
+    final watergunlogsFuture = await _mnWaterGunLog!.toList(qparams);
+    final int count = watergunlogsFuture[0]['CNT'] as int;
+    if (watergunlogCount != null) {
+      watergunlogCount(count);
+    }
+    return count;
+  }
+
+  /// This method returns List<WaterGunLog> [WaterGunLog]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toList(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toList(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>List<WaterGunLog>
+  @override
+  Future<List<WaterGunLog>> toList(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    final data = await toMapList();
+    final List<WaterGunLog> watergunlogsData = await WaterGunLog.fromMapList(
+        data,
+        preload: preload,
+        preloadFields: preloadFields,
+        loadParents: loadParents,
+        loadedFields: loadedFields,
+        setDefaultValues: qparams.selectColumns == null);
+    return watergunlogsData;
+  }
+
+  /// This method returns Json String [WaterGunLog]
+  @override
+  Future<String> toJson() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(o.toMap(forJson: true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns Json String. [WaterGunLog]
+  @override
+  Future<String> toJsonWithChilds() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(await o.toMapWithChildren(false, true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns List<dynamic>. [WaterGunLog]
+  /// <returns>List<dynamic>
+  @override
+  Future<List<dynamic>> toMapList() async {
+    buildParameters();
+    return await _mnWaterGunLog!.toList(qparams);
+  }
+
+  /// This method returns Primary Key List SQL and Parameters retVal = Map<String,dynamic>. [WaterGunLog]
+  /// retVal['sql'] = SQL statement string, retVal['args'] = whereArguments List<dynamic>;
+  /// <returns>List<String>
+  @override
+  Map<String, dynamic> toListPrimaryKeySQL([bool buildParams = true]) {
+    final Map<String, dynamic> _retVal = <String, dynamic>{};
+    if (buildParams) {
+      buildParameters();
+    }
+    _retVal['sql'] =
+        'SELECT `id` FROM waterGunLog WHERE ${qparams.whereString}';
+    _retVal['args'] = qparams.whereArguments;
+    return _retVal;
+  }
+
+  /// This method returns Primary Key List<int>.
+  /// <returns>List<int>
+  @override
+  Future<List<int>> toListPrimaryKey([bool buildParams = true]) async {
+    if (buildParams) {
+      buildParameters();
+    }
+    final List<int> idData = <int>[];
+    qparams.selectColumns = ['id'];
+    final idFuture = await _mnWaterGunLog!.toList(qparams);
+
+    final int count = idFuture.length;
+    for (int i = 0; i < count; i++) {
+      idData.add(idFuture[i]['id'] as int);
+    }
+    return idData;
+  }
+
+  /// Returns List<dynamic> for selected columns. Use this method for 'groupBy' with min,max,avg..  [WaterGunLog]
+  /// Sample usage: (see EXAMPLE 4.2 at https://github.com/hhtokpinar/sqfEntity#group-by)
+  @override
+  Future<List<dynamic>> toListObject() async {
+    buildParameters();
+
+    final objectFuture = _mnWaterGunLog!.toList(qparams);
+
+    final List<dynamic> objectsData = <dynamic>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i]);
+    }
+    return objectsData;
+  }
+
+  /// Returns List<String> for selected first column
+  /// Sample usage: await WaterGunLog.select(columnsToSelect: ['columnName']).toListString()
+  @override
+  Future<List<String>> toListString(
+      [VoidCallback Function(List<String> o)? listString]) async {
+    buildParameters();
+
+    final objectFuture = _mnWaterGunLog!.toList(qparams);
+
+    final List<String> objectsData = <String>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i][qparams.selectColumns![0]].toString());
+    }
+    if (listString != null) {
+      listString(objectsData);
+    }
+    return objectsData;
+  }
+}
+// endregion WaterGunLogFilterBuilder
+
+// region WaterGunLogFields
+class WaterGunLogFields {
+  static TableField? _fId;
+  static TableField get id {
+    return _fId = _fId ?? SqlSyntax.setField(_fId, 'id', DbType.integer);
+  }
+
+  static TableField? _fDeployedSector;
+  static TableField get deployedSector {
+    return _fDeployedSector = _fDeployedSector ??
+        SqlSyntax.setField(_fDeployedSector, 'deployedSector', DbType.integer);
+  }
+
+  static TableField? _fRecordedDate;
+  static TableField get recordedDate {
+    return _fRecordedDate = _fRecordedDate ??
+        SqlSyntax.setField(_fRecordedDate, 'recordedDate', DbType.datetime);
+  }
+}
+// endregion WaterGunLogFields
+
+//region WaterGunLogManager
+class WaterGunLogManager extends SqfEntityProvider {
+  WaterGunLogManager()
+      : super(GuardianDatabaseModel(),
+            tableName: _tableName,
+            primaryKeyList: _primaryKeyList,
+            whereStr: _whereStr);
+  static const String _tableName = 'waterGunLog';
+  static const List<String> _primaryKeyList = ['id'];
+  static const String _whereStr = 'id=?';
+}
+
+//endregion WaterGunLogManager
 class GuardianDatabaseModelSequenceManager extends SqfEntityProvider {
   GuardianDatabaseModelSequenceManager() : super(GuardianDatabaseModel());
 }

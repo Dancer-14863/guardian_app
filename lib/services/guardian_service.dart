@@ -8,6 +8,7 @@ import 'package:guardian_app/services/serial_service.dart';
 import 'package:guardian_app/utils/constants/commands.dart';
 import 'package:guardian_app/utils/constants/status.dart';
 import 'package:guardian_app/utils/toast_helpers.dart';
+import 'package:intl/intl.dart';
 
 final serialService = Provider((_) => SerialService());
 final databaseService = Provider((_) => DatabaseService());
@@ -87,6 +88,30 @@ class GuardianService {
     );
   }
 
+  Future<int> getNumberOfAlarmLogs() async {
+    return await _databaseService.fetchNumberOfAlarmLogs();
+  }
+
+  Future<String> getLatestAlarmDateTime() async {
+    DateFormat formatter = DateFormat('dd/MM/yyyy HH:mm:ss');
+    AlarmLog? alarmLog = await _databaseService.fetchLatestAlarmLog();
+    return alarmLog?.recordedDate != null
+        ? formatter.format(alarmLog!.recordedDate!)
+        : '-';
+  }
+
+  Future<List<DistanceLog>> getDistanceLogs() async {
+    return await _databaseService.fetchAllDistanceLogs();
+  }
+
+  Future<List<PressurePlateLog>> getPressurePlateLogs() async {
+    return await _databaseService.fetchAllPressurePlateLogs();
+  }
+
+  Future<List<WaterGunLog>> getWaterGunLogs() async {
+    return await _databaseService.fetchAllWaterGunLogs();
+  }
+
   void _startLogging() async {
     _receivePort = ReceivePort();
     _isolate = await Isolate.spawn(_checkTimer, _receivePort!.sendPort);
@@ -107,6 +132,11 @@ class GuardianService {
               '999',
         ) ??
         999;
+
+    if (distance < ref.read(distanceAlarmThreshold)) {
+      _databaseService.createDistanceLog(distance);
+    }
+
     int pressedPressurePlate = int.tryParse(
           await _serialService.makeTransaction(
                 Commands.getPressureStatus,
@@ -114,9 +144,14 @@ class GuardianService {
               '-1',
         ) ??
         -1;
+    if (pressedPressurePlate > 0) {
+      _databaseService.createPressurePlateLog(pressedPressurePlate);
+    }
+
     if (!ref.read(isDeviceInAlarmState)) {
       if (pressedPressurePlate > 0 &&
           distance < ref.read(distanceAlarmThreshold)) {
+        _databaseService.createAlarmLog();
         _toggleAlarmDevices(true);
         _setIsDeviceInAlarmState(true);
       }
@@ -136,6 +171,7 @@ class GuardianService {
           break;
       }
       if (pressedPressurePlate > 0 && pressedPressurePlate <= 4) {
+        _databaseService.createWaterGunLog(pressedPressurePlate);
         showToast(
           message:
               'Water Gun has been deployed to Sector $pressedPressurePlate',

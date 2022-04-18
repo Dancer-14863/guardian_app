@@ -37,6 +37,35 @@ const tablePressurePlateLog = SqfEntityTable(
   ],
 );
 
+const tableWaterGunLog = SqfEntityTable(
+  tableName: 'waterGunLog',
+  primaryKeyName: 'id',
+  primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+  useSoftDeleting: false,
+  fields: [
+    SqfEntityField('deployedSector', DbType.integer),
+    SqfEntityField(
+      'recordedDate',
+      DbType.datetime,
+      defaultValue: 'DateTime.now()',
+    ),
+  ],
+);
+
+const tableAlarmLog = SqfEntityTable(
+  tableName: 'alarmLog',
+  primaryKeyName: 'id',
+  primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+  useSoftDeleting: false,
+  fields: [
+    SqfEntityField(
+      'recordedDate',
+      DbType.datetime,
+      defaultValue: 'DateTime.now()',
+    ),
+  ],
+);
+
 const tableConfiguration = SqfEntityTable(
   tableName: 'configuration',
   primaryKeyName: 'id',
@@ -53,6 +82,12 @@ const guardianDatabaseModel = SqfEntityModel(
   modelName: 'GuardianDatabaseModel',
   databaseName: 'guardianDatabase.db',
   password: null,
-  databaseTables: [tableDistanceLog, tablePressurePlateLog, tableConfiguration],
+  databaseTables: [
+    tableDistanceLog,
+    tablePressurePlateLog,
+    tableConfiguration,
+    tableAlarmLog,
+    tableWaterGunLog,
+  ],
   dbVersion: 2,
 );
