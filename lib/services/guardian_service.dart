@@ -73,6 +73,14 @@ class GuardianService {
     }
   }
 
+  Future<void> initConfiguration() async {
+    Configuration? configuration =
+        await _databaseService.fetchLatestConfiguration();
+    if (configuration == null) {
+      await _databaseService.createDefaultConfiguration();
+    }
+  }
+
   Future<void> setWaterGunStatus(bool state) async {
     _setShouldWaterGunBeOnState(state);
     await _databaseService.updateLatestConfigurationWaterGunStatus(state);

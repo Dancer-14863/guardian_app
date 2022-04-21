@@ -2,6 +2,10 @@ import 'package:guardian_app/models/models.dart';
 import 'package:intl/intl.dart';
 
 class DatabaseService {
+  Future<void> createDefaultConfiguration() async {
+    await Configuration().save();
+  }
+
   Future<Configuration?> fetchLatestConfiguration() async {
     return await Configuration().select().orderByDesc('id').toSingle();
   }

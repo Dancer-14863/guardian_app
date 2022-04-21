@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
-import 'package:guardian_app/models/models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:guardian_app/pages/home_screen/home_screen.dart';
 import 'package:guardian_app/themes/theme_options.dart';
 import 'package:sizer/sizer.dart';
 import 'package:theme_provider/theme_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _SplashScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   static const String _logoAssetPath = 'assets/logo.svg';
 
   @override
@@ -58,11 +59,8 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
-}
 
-Future<void> _addDefaultConfigurationIfNotExists() async {
-  final count = await Configuration().select().toCount();
-  if (count == 0) {
-    await Configuration().save();
+  Future<void> _addDefaultConfigurationIfNotExists() async {
+    await ref.watch(guardianService).initConfiguration();
   }
 }
